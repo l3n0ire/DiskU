@@ -27,11 +27,11 @@ if [[ $config == release ]]; then flags+=(-O); else flags+=(-Onone -g -enable-te
 
 swiftc "${flags[@]}" -parse-as-library -module-name DiskUKit \
   -emit-library -static -emit-module -emit-module-path $out/DiskUKit.swiftmodule \
-  -o $out/libDiskUKit.a Sources/DiskUKit/*.swift
+  -o $out/libDiskUKit.a Sources/DiskUKit/**/*.swift
 
 for exe in DiskU diskusnap; do
   swiftc "${flags[@]}" -parse-as-library -module-name $exe -I $out -L $out -lDiskUKit \
-    -o $out/$exe Sources/$exe/*.swift
+    -o $out/$exe Sources/$exe/**/*.swift
 done
 
 if [[ $mode == test ]]; then
@@ -39,6 +39,6 @@ if [[ $mode == test ]]; then
   # The CLT ship Testing without its Foundation cross-import overlay module.
   swiftc "${flags[@]}" -parse-as-library -module-name DiskUKitTests -I $out -L $out -lDiskUKit \
     -Xfrontend -disable-cross-import-overlays -F $fw -Xlinker -rpath -Xlinker $fw \
-    -o $out/DiskUKitTests Tests/DiskUKitTests/*.swift scripts/TestRunner.swift
+    -o $out/DiskUKitTests Tests/DiskUKitTests/**/*.swift scripts/TestRunner.swift
   $out/DiskUKitTests
 fi
