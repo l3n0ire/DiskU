@@ -75,3 +75,21 @@ func makeFixture() throws -> URL {
         try await Scanner.scan(root.appendingPathComponent("movie.mov"))
     }
 }
+
+@MainActor
+@Test func progressReportsFinalCounts() async throws {
+    let root = try makeFixture()
+    defer { try? FileManager.default.removeItem(at: root) }
+    var last = ScanProgress()
+    _ = try await Scanner.scan(root) { last = $0 }
+    #expect(last.filesSeen == 8)
+    #expect(last.bytesSeen == 13 * 4096)
+}
+
+@Test func cancelledScanThrowsCancellation() async throws {
+    let root = try makeFixture()
+    defer { try? FileManager.default.removeItem(at: root) }
+    let task = Task { try await Scanner.scan(root) }
+    task.cancel()
+    await #expect(throws: CancellationError.self) { try await task.value }
+}
