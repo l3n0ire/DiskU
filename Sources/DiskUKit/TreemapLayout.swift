@@ -45,7 +45,7 @@ public struct TreemapLayout {
         var header: CGRect?
         if rect.width > 4 * inset, rect.height > 4 * inset {
             content = rect.insetBy(dx: inset, dy: inset)
-            if content.height > headerHeight * 2.5, content.width > 40 {
+            if content.height > headerHeight * 2.5, content.width > 80 {
                 header = CGRect(x: content.minX, y: content.minY, width: content.width, height: headerHeight)
                 content = content.divided(atDistance: headerHeight, from: .minYEdge).remainder
             }

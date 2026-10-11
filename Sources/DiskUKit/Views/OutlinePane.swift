@@ -84,7 +84,7 @@ struct ProportionBar: View {
 
     var body: some View {
         Capsule()
-            .fill(.quaternary)
+            .fill(Color.primary.opacity(0.1))
             .frame(height: 3)
             .overlay(alignment: .leading) {
                 GeometryReader { geometry in

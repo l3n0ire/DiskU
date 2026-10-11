@@ -117,19 +117,16 @@ struct Breadcrumbs: View {
                     if index > 0 {
                         Image(systemName: "chevron.right").font(.caption2.weight(.semibold)).foregroundStyle(.tertiary)
                     }
-                    Button {
-                        store.zoomRoot = node === store.root ? nil : node
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(nsImage: Icons.icon(for: node.url)).resizable().frame(width: 14, height: 14)
-                            Text(node.name)
-                        }
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(node === store.displayRoot ? AnyShapeStyle(.quaternary) : AnyShapeStyle(.clear),
-                                    in: RoundedRectangle(cornerRadius: 5))
+                    HStack(spacing: 4) {
+                        Image(nsImage: Icons.icon(for: node.url)).resizable().frame(width: 14, height: 14)
+                        Text(node.name)
                     }
-                    .buttonStyle(.plain)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(node === store.displayRoot ? Color.primary.opacity(0.12) : Color.clear,
+                                in: RoundedRectangle(cornerRadius: 5))
+                    .contentShape(Rectangle())
+                    .onTapGesture { store.zoomRoot = node === store.root ? nil : node }
                 }
                 if let zoomRoot = store.zoomRoot {
                     Text(Format.bytes(zoomRoot.size))
