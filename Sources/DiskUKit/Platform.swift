@@ -3,8 +3,15 @@ import Quartz
 import SwiftUI
 
 public enum Format {
+    private static let byteFormatter: ByteCountFormatter = {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        formatter.allowsNonnumericFormatting = false
+        return formatter
+    }()
+
     public static func bytes(_ count: Int64) -> String {
-        ByteCountFormatter.string(fromByteCount: count, countStyle: .file)
+        byteFormatter.string(fromByteCount: count)
     }
 
     public static func items(_ count: Int) -> String {

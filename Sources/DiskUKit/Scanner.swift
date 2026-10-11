@@ -71,11 +71,12 @@ private final class Walker: @unchecked Sendable {
         if root.path == "/" {
             // "/" is the sealed system volume; user data lives on the Data volume and is
             // reachable through firmlinks, so allow it but skip its second mount point.
+            // /.nofollow and /.resolve are path-resolution aliases that re-list the whole root.
             let data = URL(fileURLWithPath: "/System/Volumes/Data")
             if let id = try? data.resourceValues(forKeys: [.volumeIdentifierKey]).volumeIdentifier as? NSObject {
                 volumes.append(id)
             }
-            skippedPaths = ["/System/Volumes", "/Volumes"]
+            skippedPaths = ["/System/Volumes", "/Volumes", "/.nofollow", "/.resolve", "/.vol", "/dev"]
         } else {
             skippedPaths = []
         }
@@ -132,7 +133,7 @@ private final class Walker: @unchecked Sendable {
                 leaves.append(FileNode(url: child, kind: .other, size: Self.allocated(values), itemCount: 1))
                 files += 1
             } else if values.isDirectory == true {
-                if !skippedPaths.isEmpty, skippedPaths.contains(child.path) { continue }
+                if !skippedPaths.isEmpty, skippedPaths.contains(Self.trimmedPath(child)) { continue }
                 guard isAllowedVolume(values.volumeIdentifier) else { continue }
                 if values.isPackage == true {
                     let (size, count) = packageTotals(child)
@@ -175,6 +176,12 @@ private final class Walker: @unchecked Sendable {
     private func isAllowedVolume(_ id: (any NSCopying & NSSecureCoding & NSObjectProtocol)?) -> Bool {
         guard let id = id as? NSObject else { return true }
         return allowedVolumes.contains { $0.isEqual(id) }
+    }
+
+    /// Foundation reports some root entries (e.g. "/.nofollow/") with a trailing slash.
+    private static func trimmedPath(_ url: URL) -> String {
+        let path = url.path
+        return path.count > 1 && path.hasSuffix("/") ? String(path.dropLast()) : path
     }
 
     private static func allocated(_ values: URLResourceValues) -> Int64 {
