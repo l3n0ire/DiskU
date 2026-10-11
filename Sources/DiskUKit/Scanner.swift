@@ -23,7 +23,8 @@ public struct ScanResult: Sendable {
 
 public enum Scanner {
     /// Scans `url` without following symlinks or crossing onto other volumes.
-    /// `onProgress` is called on the main actor at most ~10 times per second.
+    /// `onProgress` is called on the main actor at most ~10 times per second, and never after
+    /// this function returns or throws.
     public static func scan(
         _ url: URL,
         onProgress: @escaping @MainActor @Sendable (ScanProgress) -> Void = { _ in }
@@ -37,9 +38,17 @@ public enum Scanner {
                 await onProgress(walker.progress)
             }
         }
-        defer { ticker.cancel() }
-
-        let root = try await walker.scanParallel(walker.root, depth: 0)
+        let root: FileNode
+        do {
+            root = try await walker.scanParallel(walker.root, depth: 0)
+        } catch {
+            ticker.cancel()
+            await ticker.value
+            throw error
+        }
+        // Drain the ticker so no progress callback can land after the caller sees the result.
+        ticker.cancel()
+        await ticker.value
         await onProgress(walker.progress)
         return ScanResult(root: root, inaccessible: walker.inaccessible, elapsed: ContinuousClock.now - start)
     }

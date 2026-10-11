@@ -40,5 +40,5 @@ if [[ $mode == test ]]; then
   swiftc "${flags[@]}" -parse-as-library -module-name DiskUKitTests -I $out -L $out -lDiskUKit \
     -Xfrontend -disable-cross-import-overlays -F $fw -Xlinker -rpath -Xlinker $fw \
     -o $out/DiskUKitTests Tests/DiskUKitTests/**/*.swift scripts/TestRunner.swift
-  $out/DiskUKitTests
+  perl -e "alarm 120; exec @ARGV" $out/DiskUKitTests
 fi

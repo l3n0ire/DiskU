@@ -24,6 +24,7 @@ public final class DiskStore {
     public var errorMessage: String?
 
     @ObservationIgnored private var scanTask: Task<Void, Never>?
+    @ObservationIgnored private var scanGeneration = 0
     @ObservationIgnored private let trasher: (URL) throws -> Void
     @ObservationIgnored private var layoutCache: (key: LayoutKey, layout: TreemapLayout)?
     @ObservationIgnored private var kindTotalsCache: (revision: Int, totals: [(Kind, Int64)])?
@@ -47,17 +48,19 @@ public final class DiskStore {
         hovered = nil
         expanded = []
         state = .scanning(progress: ScanProgress())
+        scanGeneration += 1
+        let generation = scanGeneration
+        // A superseded or cancelled scan must not overwrite the state of the one that replaced it.
         scanTask = Task {
             do {
                 let result = try await Scanner.scan(url) { [weak self] progress in
-                    guard let self, case .scanning = self.state else { return }
+                    guard let self, self.scanGeneration == generation else { return }
                     self.state = .scanning(progress: progress)
                 }
-                self.finish(result)
-            } catch is CancellationError {
-                self.state = .idle
+                if scanGeneration == generation { finish(result) }
             } catch {
-                self.state = .failed(error.localizedDescription)
+                guard scanGeneration == generation else { return }
+                state = error is CancellationError ? .idle : .failed(error.localizedDescription)
             }
         }
     }
@@ -72,6 +75,7 @@ public final class DiskStore {
     public func cancelScan() {
         scanTask?.cancel()
         scanTask = nil
+        scanGeneration += 1
         state = .idle
     }
 

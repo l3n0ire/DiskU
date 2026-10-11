@@ -77,3 +77,23 @@ import Testing
     #expect(abs(movie.rect.width * movie.rect.height - 5.0 / 13.0 * 396 * 281) < 0.5)
     #expect(first.tile(at: CGPoint(x: movie.rect.midX, y: movie.rect.midY))?.node.name == "movie.mov")
 }
+
+@MainActor
+@Test func cancelledScanDoesNotOverwriteItsReplacement() async throws {
+    let first = try makeFixture()
+    let second = try makeFixture()
+    defer { for dir in [first, second] { try? FileManager.default.removeItem(at: dir) } }
+    let store = DiskStore(trasher: { _ in })
+
+    store.scan(first)
+    store.cancelScan()
+    store.scan(second)
+    let deadline = ContinuousClock.now + .seconds(5)
+    while case .scanning = store.state, ContinuousClock.now < deadline {
+        try await Task.sleep(for: .milliseconds(10))
+    }
+
+    let scanned = try #require(store.root)
+    #expect(scanned.url.standardizedFileURL == second.standardizedFileURL)
+    #expect(scanned.size == 13 * 4096)
+}
