@@ -6,6 +6,7 @@ private struct LayoutKey: Equatable {
     let width: CGFloat
     let height: CGFloat
     let revision: Int
+    let collapsed: Set<FileNode>
 }
 
 /// Owns the scanned tree and all UI state that refers into it. `FileNode` is not observable
@@ -18,6 +19,8 @@ public final class DiskStore {
     public var zoomRoot: FileNode?
     public var hovered: FileNode?
     public var expanded: Set<FileNode> = []
+    /// Folders the treemap draws as a single block. Separate from `expanded`, which is the outline's.
+    public private(set) var collapsed: Set<FileNode> = []
     public private(set) var lastScanned: URL?
     /// Item awaiting the user's confirmation before it goes to the Trash.
     public var pendingTrash: FileNode?
@@ -47,6 +50,7 @@ public final class DiskStore {
         zoomRoot = nil
         hovered = nil
         expanded = []
+        collapsed = []
         state = .scanning(progress: ScanProgress())
         scanGeneration += 1
         let generation = scanGeneration
@@ -89,6 +93,11 @@ public final class DiskStore {
         zoomRoot = folder === root ? nil : folder
     }
 
+    public func toggleCollapsed(_ folder: FileNode) {
+        guard folder.isFolder, !folder.children.isEmpty, folder !== displayRoot else { return }
+        if collapsed.remove(folder) == nil { collapsed.insert(folder) }
+    }
+
     /// Moves the item to the Trash and removes it from the tree. Throws if the Trash refuses.
     public func trash(_ node: FileNode) throws {
         guard node !== root else { return }
@@ -98,6 +107,7 @@ public final class DiskStore {
         if let selection, selection.isDescendant(of: node) { self.selection = parent }
         if let hovered, hovered.isDescendant(of: node) { self.hovered = nil }
         expanded.remove(node)
+        collapsed.remove(node)
         node.removeFromParent()
         revision += 1
     }
@@ -112,12 +122,13 @@ public final class DiskStore {
         }
     }
 
-    /// Layout for the current zoom root, recomputed only when the root, size, or tree changes.
+    /// Layout for the current zoom root, recomputed only when the root, size, tree, or collapsed set changes.
     public func layout(for size: CGSize) -> TreemapLayout? {
         guard let displayRoot else { return nil }
-        let key = LayoutKey(root: ObjectIdentifier(displayRoot), width: size.width, height: size.height, revision: revision)
+        let key = LayoutKey(root: ObjectIdentifier(displayRoot), width: size.width, height: size.height, revision: revision,
+                            collapsed: collapsed)
         if let layoutCache, layoutCache.key == key { return layoutCache.layout }
-        let layout = TreemapLayout(root: displayRoot, in: CGRect(origin: .zero, size: size))
+        let layout = TreemapLayout(root: displayRoot, in: CGRect(origin: .zero, size: size), collapsed: collapsed)
         layoutCache = (key, layout)
         return layout
     }

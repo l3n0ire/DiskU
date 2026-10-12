@@ -2,7 +2,7 @@ import AppKit
 import DiskUKit
 import SwiftUI
 
-/// diskusnap <dir> <out.png> [--renderer window|image] [--zoom]
+/// diskusnap <dir> <out.png> [--renderer window|image] [--zoom] [--collapse]
 /// diskusnap --home <out.png>
 /// Scans <dir> with the real scanner, selects its largest child, and renders the real browser view.
 /// With --home it skips scanning and renders the home screen instead.
@@ -23,14 +23,15 @@ struct DiskUSnap {
             return
         }
         let zoom = args.contains("--zoom")
-        args.removeAll { $0 == "--zoom" }
+        let collapse = args.contains("--collapse")
+        args.removeAll { $0 == "--zoom" || $0 == "--collapse" }
         var renderer = "window"
         if let index = args.firstIndex(of: "--renderer"), index + 1 < args.count {
             renderer = args[index + 1]
             args.removeSubrange(index...index + 1)
         }
         guard args.count == 2 else {
-            FileHandle.standardError.write(Data("usage: diskusnap <dir> <out.png> [--renderer window|image] [--zoom]\n       diskusnap --home <out.png>\n".utf8))
+            FileHandle.standardError.write(Data("usage: diskusnap <dir> <out.png> [--renderer window|image] [--zoom] [--collapse]\n       diskusnap --home <out.png>\n".utf8))
             exit(64)
         }
         let dir = URL(fileURLWithPath: (args[0] as NSString).expandingTildeInPath)
@@ -56,6 +57,10 @@ struct DiskUSnap {
             store.selection = largest.children.first
         } else {
             store.selection = largest
+        }
+        if collapse, let folder = (store.displayRoot?.children.first { $0.isFolder && !$0.children.isEmpty }) {
+            store.toggleCollapsed(folder)
+            print("collapsed \(folder.name)")
         }
         if let selection = store.selection {
             print("selected \(selection.name) (\(Format.bytes(selection.size)))")

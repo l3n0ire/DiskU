@@ -32,7 +32,7 @@ scripts/bundle.sh
 
 - **Scan.** Use the toolbar's Home or Scan… buttons. Scanning shows live progress and can be cancelled.
 - **Outline (left).** Items are sorted by size. Each row has a bar showing its share of the parent folder.
-- **Treemap (center).** Click to select, double-click to zoom into a folder, and use the breadcrumb bar to zoom back out. Hovering shows the path in the status bar.
+- **Treemap (center).** Click to select, click a folder’s title bar to collapse it into one block (click again to expand), double-click to zoom into a folder, and use the breadcrumb bar to zoom back out. Hovering shows the path in the status bar.
 - **Inspector (right).** Shows details for the selection, a legend of space used by kind, and the Reveal, Quick Look, Open, and Move to Trash actions.
 - **Keyboard.** Space opens Quick Look. Delete (or ⌘⌫) asks to move the selection to the Trash.
 
@@ -57,6 +57,7 @@ macOS hides some folders (Mail, Messages, Safari, other apps' containers, parts 
 ```sh
 scripts/swift.sh run -c release diskusnap ~ /tmp/home.png            # full window, offscreen
 scripts/swift.sh run -c release diskusnap ~ /tmp/home.png --zoom     # zoomed into the largest folder
+scripts/swift.sh run -c release diskusnap ~ /tmp/home.png --collapse # largest folder collapsed
 scripts/swift.sh run -c release diskusnap ~ /tmp/tm.png --renderer image  # ImageRenderer, treemap pane only
 scripts/swift.sh run -c release diskusnap --home /tmp/home-screen.png      # home screen, no scan
 scripts/make-fixture.sh /tmp/fixture                        # 106,958,848-byte fixture with a symlink loop
