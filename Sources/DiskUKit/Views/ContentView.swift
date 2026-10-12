@@ -225,16 +225,20 @@ struct ScanToolbar: ToolbarContent {
         ToolbarItemGroup(placement: .primaryAction) {
             if case .scanning = store.state {
                 Button { store.cancelScan() } label: { Label("Cancel", systemImage: "xmark.circle") }
+                    .help("Stop scanning")
             } else {
                 Button { store.rescan() } label: { Label("Rescan", systemImage: "arrow.clockwise") }
                     .disabled(store.lastScanned == nil)
+                    .help(store.lastScanned.map { "Scan “\($0.lastPathComponent)” again (⌘R)" } ?? "Scan again (⌘R)")
             }
             Button { store.scan(FileManager.default.homeDirectoryForCurrentUser) } label: {
                 Label("Home", systemImage: "house")
             }
+            .help("Scan your home folder (⇧⌘H)")
             Button { if let url = Actions.chooseFolder() { store.scan(url) } } label: {
                 Label("Scan…", systemImage: "folder.badge.gearshape")
             }
+            .help("Choose a folder to scan (⌘O)")
         }
     }
 }
