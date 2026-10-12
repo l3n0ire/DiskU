@@ -32,7 +32,7 @@ scripts/bundle.sh
 
 ## Releases
 
-Pushing a version tag on `main` builds and publishes a GitHub release with `DiskU-X.Y.Z.zip` (`.github/workflows/release.yml`):
+Pushing a version tag on `main` builds and publishes a GitHub release with `DiskU-X.Y.Z.zip`, a universal app for Apple Silicon and Intel Macs (`.github/workflows/release.yml`):
 
 ```sh
 git tag v1.0.0

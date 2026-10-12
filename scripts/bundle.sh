@@ -1,13 +1,15 @@
 #!/bin/zsh
-# Builds release binaries and assembles an ad-hoc signed DiskU.app at the repo root.
+# Builds a universal release binary and assembles an ad-hoc signed DiskU.app at the repo root.
 # DISKU_VERSION (default 1.0) and DISKU_BUILD (default 1) set the version shown in Finder.
 set -euo pipefail
 cd "${0:A:h}/.."
 version=${DISKU_VERSION:-1.0}
 build=${DISKU_BUILD:-1}
 
-scripts/swift.sh build -c release --product DiskU
-binary=$(scripts/swift.sh build -c release --show-bin-path)/DiskU
+# Universal binary so the app runs on both Apple Silicon and Intel Macs.
+arch=(--arch arm64 --arch x86_64)
+scripts/swift.sh build -c release --product DiskU $arch
+binary=$(scripts/swift.sh build -c release $arch --show-bin-path)/DiskU
 
 app=DiskU.app
 rm -rf $app
