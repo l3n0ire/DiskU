@@ -1,35 +1,32 @@
 // Turns Resources/AppIcon.png into Resources/AppIcon.icns.
-// The source art is an opaque square with black corners, so this crops to the bright tile, masks its
-// corners transparent, and centers it at 824/1024 per Apple's macOS icon grid.
+// The source art sits on an opaque white background, so this lifts the subject out with Vision,
+// trims to it, and fits it inside the 824/1024 artwork area of Apple's macOS icon grid.
 import AppKit
+import CoreImage
+import Vision
 
 let root = URL(fileURLWithPath: CommandLine.arguments[1])
-let source = NSImage(contentsOf: root.appendingPathComponent("Resources/AppIcon.png"))!
-var rect = CGRect(origin: .zero, size: source.size)
-let cg = source.cgImage(forProposedRect: &rect, context: nil, hints: nil)!
-let bitmap = NSBitmapImageRep(cgImage: cg)
+let source = CIImage(contentsOf: root.appendingPathComponent("Resources/AppIcon.png"))!
 
-func isBright(_ x: Int, _ y: Int) -> Bool {
-    guard let c = bitmap.colorAt(x: x, y: y) else { return false }
-    return c.redComponent + c.greenComponent + c.blueComponent > 0.6
-}
-let w = bitmap.pixelsWide, h = bitmap.pixelsHigh, mid = h / 2
-let left = (0..<w).first { isBright($0, mid) }!
-let right = (0..<w).last { isBright($0, mid) }!
-let top = (0..<h).first { isBright(w / 2, $0) }!
-let bottom = (0..<h).last { isBright(w / 2, $0) }!
-let tile = cg.cropping(to: CGRect(x: left, y: top, width: right - left + 1, height: bottom - top + 1))!
+let request = VNGenerateForegroundInstanceMaskRequest()
+let handler = VNImageRequestHandler(ciImage: source)
+try! handler.perform([request])
+let observation = request.results!.first!
+let cutout = CIImage(cvPixelBuffer: try! observation.generateMaskedImage(
+    ofInstances: observation.allInstances, from: handler, croppedToInstancesExtent: true))
+
+let context = CIContext()
+let subject = context.createCGImage(cutout, from: cutout.extent)!
 
 func render(_ size: Int) -> Data {
     let ctx = CGContext(data: nil, width: size, height: size, bitsPerComponent: 8, bytesPerRow: 0,
                         space: CGColorSpace(name: CGColorSpace.sRGB)!,
                         bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
     ctx.interpolationQuality = .high
-    let s = CGFloat(size), side = s * 824 / 1024
-    let frame = CGRect(x: (s - side) / 2, y: (s - side) / 2, width: side, height: side)
-    ctx.addPath(CGPath(roundedRect: frame, cornerWidth: side * 0.225, cornerHeight: side * 0.225, transform: nil))
-    ctx.clip()
-    ctx.draw(tile, in: frame)
+    let s = CGFloat(size), box = s * 824 / 1024
+    let scale = box / CGFloat(max(subject.width, subject.height))
+    let w = CGFloat(subject.width) * scale, h = CGFloat(subject.height) * scale
+    ctx.draw(subject, in: CGRect(x: (s - w) / 2, y: (s - h) / 2, width: w, height: h))
     return NSBitmapImageRep(cgImage: ctx.makeImage()!).representation(using: .png, properties: [:])!
 }
 
@@ -45,5 +42,5 @@ iconutil.executableURL = URL(fileURLWithPath: "/usr/bin/iconutil")
 iconutil.arguments = ["-c", "icns", iconset.path, "-o", root.appendingPathComponent("Resources/AppIcon.icns").path]
 try! iconutil.run()
 iconutil.waitUntilExit()
-print("crop \(left),\(top) to \(right),\(bottom) of \(w)x\(h)")
+print("subject \(subject.width)x\(subject.height)")
 exit(iconutil.terminationStatus)
