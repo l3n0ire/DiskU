@@ -4,7 +4,15 @@ DiskU is a native macOS disk-usage visualizer in the spirit of Disk Inventory X.
 
 ![DiskU showing a scanned home folder as a treemap](docs/screenshot.png)
 
-Requires macOS 14 or later.
+Requires macOS 14 or later. Runs natively on both Apple Silicon and Intel Macs.
+
+## Install
+
+1. Download `DiskU-X.Y.Z.zip` from the [latest release](../../releases/latest) and unzip it.
+2. Open `DiskU.app`. DiskU is not signed, so macOS blocks it the first time.
+3. Go to **System Settings > Privacy & Security**, scroll to the bottom, find the message about DiskU, and click **Open Anyway**.
+
+You only need to do this once.
 
 ## Build and run
 
@@ -41,7 +49,7 @@ git push origin v1.0.0
 
 The workflow runs the tests, then `scripts/release.sh`, which you can also run locally (`scripts/release.sh v1.0.0` writes `dist/DiskU-1.0.0.zip`). Tags must look like `v1.2.3`, and the tagged commit must be on `main`.
 
-The app is ad-hoc signed and not notarized, so macOS blocks it the first time. Right-click `DiskU.app` and choose Open, or run `xattr -dr com.apple.quarantine DiskU.app`.
+The app is ad-hoc signed and not notarized, so first-time users need the **Open Anyway** step in [Install](#install).
 
 To scan a folder at launch, pass it as an argument:
 
