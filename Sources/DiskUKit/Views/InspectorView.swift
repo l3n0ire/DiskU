@@ -31,6 +31,7 @@ private struct ItemDetails: View {
     let node: FileNode
     let revision: Int
     @Environment(DiskStore.self) private var store
+    @State private var copied = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -54,6 +55,12 @@ private struct ItemDetails: View {
             }
 
             Text(Format.bytes(node.size))
+                .onChange(of: node) { copied = false }
+                .task(id: copied) {
+                    guard copied else { return }
+                    try? await Task.sleep(for: .seconds(1.5))
+                    copied = false
+                }
                 .font(.system(size: 30, weight: .bold, design: .rounded).monospacedDigit())
 
             Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 6) {
@@ -71,10 +78,19 @@ private struct ItemDetails: View {
             .font(.callout)
 
             VStack(spacing: 8) {
-                HStack(spacing: 8) {
-                    Button { Actions.reveal(node) } label: { Label("Reveal", systemImage: "folder") }
-                    Button { Actions.quickLook(node) } label: { Label("Quick Look", systemImage: "eye") }
-                    Button { Actions.open(node) } label: { Label("Open", systemImage: "arrow.up.forward.app") }
+                Grid(horizontalSpacing: 8, verticalSpacing: 8) {
+                    GridRow {
+                        action("Reveal", "folder") { Actions.reveal(node) }
+                        action("Quick Look", "eye") { Actions.quickLook(node) }
+                    }
+                    GridRow {
+                        action("Open", "arrow.up.forward.app") { Actions.open(node) }
+                        action(copied ? "Copied" : "Copy Path", copied ? "checkmark" : "doc.on.doc") {
+                            Actions.copyPath(node)
+                            copied = true
+                        }
+                        .help(node.url.path)
+                    }
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.regular)
@@ -89,6 +105,12 @@ private struct ItemDetails: View {
                 .controlSize(.large)
                 .disabled(node === store.root)
             }
+        }
+    }
+
+    private func action(_ title: String, _ symbol: String, perform: @escaping () -> Void) -> some View {
+        Button(action: perform) {
+            Label(title, systemImage: symbol).frame(maxWidth: .infinity)
         }
     }
 

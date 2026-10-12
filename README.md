@@ -69,7 +69,7 @@ open DiskU.app --args /Users/Shared/DiskU-Demo/Home
 - **Scan.** Use the toolbar's Home or Scan… buttons. Scanning shows live progress and can be cancelled.
 - **Outline (left).** Items are sorted by size. Each row has a bar showing its share of the parent folder.
 - **Treemap (center).** Click to select, double-click to zoom into a folder, and use the breadcrumb bar to zoom back out. Hovering shows the path in the status bar.
-- **Inspector (right).** Shows details for the selection, a legend of space used by kind, and the Reveal, Quick Look, Open, and Move to Trash actions.
+- **Inspector (right).** Shows details for the selection, a legend of space used by kind, and the Reveal, Quick Look, Open, Copy Path (⌥⌘C), and Move to Trash actions.
 - **Keyboard.** Space opens Quick Look. Delete (or ⌘⌫) asks to move the selection to the Trash.
 
 DiskU never deletes files permanently. Move to Trash calls `FileManager.trashItem` after a confirmation, so you can restore items from the Trash in Finder.

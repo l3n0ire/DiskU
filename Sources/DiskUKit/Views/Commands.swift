@@ -23,6 +23,9 @@ public struct DiskUCommands: Commands {
             Button("Quick Look") { node.map(Actions.quickLook) }
                 .keyboardShortcut("y")
                 .disabled(node == nil)
+            Button("Copy Path") { node.map(Actions.copyPath) }
+                .keyboardShortcut("c", modifiers: [.command, .option])
+                .disabled(node == nil)
             Button("Open") { node.map(Actions.open) }
                 .keyboardShortcut(.downArrow)
                 .disabled(node == nil)

@@ -102,6 +102,7 @@ struct ItemMenu: View {
     var body: some View {
         Button("Reveal in Finder") { Actions.reveal(node) }
         Button("Quick Look") { Actions.quickLook(node) }
+        Button("Copy Path") { Actions.copyPath(node) }
         if node.isFolder, !node.children.isEmpty {
             Button("Zoom Into Folder") { store.zoom(into: node) }
         }

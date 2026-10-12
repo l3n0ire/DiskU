@@ -45,6 +45,11 @@ public enum Actions {
         QuickLookController.shared.toggle(node.url)
     }
 
+    public static func copyPath(_ node: FileNode) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(node.url.path, forType: .string)
+    }
+
     public static func openFullDiskAccessSettings() {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
     }
