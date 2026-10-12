@@ -23,6 +23,7 @@ A native macOS disk-usage visualizer (SwiftUI, SwiftPM, macOS 14+). See `README.
 - **File kinds and colors live in `Kind.swift`.** The extension table maps extensions to a `Kind`, and one `switch` maps a `Kind` to its label and color. Add a file type there, never with `if` checks in views.
 - **Scan status is the single `ScanState` enum** (`idle`, `scanning`, `done`, `failed`). Views switch on it. Don't add parallel booleans such as `isScanning`.
 - **A replaced or cancelled scan must not write state.** `DiskStore` tags each scan with a generation number and drops results and progress from older ones.
+- **Toolbar tooltips live in `ToolbarTooltips.byLabel`** (`Platform.swift`), keyed by the button label. SwiftUI `.help` on toolbar buttons does not show on macOS 26. A new toolbar button needs an entry there.
 - **Deleting means moving to the Trash** (`FileManager.trashItem`) after a confirmation that names the item and its size. Never add a permanent delete.
 - **The scanner does not follow symlinks or cross volumes.** There is no whole-disk button, but `/` can still be picked in the folder chooser. When scanning `/` it skips `/System/Volumes`, `/Volumes`, `/.nofollow`, `/.resolve`, `/.vol` and `/dev`. `/.nofollow` and `/.resolve` re-list the whole disk and would double count it.
 

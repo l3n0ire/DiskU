@@ -113,11 +113,36 @@ public final class QuickLookController: NSObject, QLPreviewPanelDataSource {
     }
 }
 
+/// SwiftUI's `.help` never reaches the `NSToolbarItem`s it creates (their `toolTip` stays nil on
+/// macOS 26), so the tooltips are set on the AppKit items directly, keyed by label.
+@MainActor
+enum ToolbarTooltips {
+    static let byLabel = [
+        "Rescan": "Scan the last folder again (⌘R)",
+        "Cancel": "Stop scanning",
+        "Home": "Scan your home folder (⇧⌘H)",
+        "Scan…": "Choose a folder to scan (⌘O)",
+    ]
+
+    static func install() {
+        NotificationCenter.default.addObserver(forName: NSToolbar.willAddItemNotification, object: nil, queue: .main) { note in
+            guard let item = note.userInfo?["item"] as? NSToolbarItem else { return }
+            MainActor.assumeIsolated { apply(to: item) }
+        }
+        for item in NSApp.windows.flatMap({ $0.toolbar?.items ?? [] }) { apply(to: item) }
+    }
+
+    private static func apply(to item: NSToolbarItem) {
+        if let tip = byLabel[item.label] { item.toolTip = tip }
+    }
+}
+
 public final class DiskUAppDelegate: NSObject, NSApplicationDelegate {
     public func applicationDidFinishLaunching(_ notification: Notification) {
         // Running the bare executable (not the .app) would otherwise leave no Dock icon or menu bar.
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
+        ToolbarTooltips.install()
     }
 
     public func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
