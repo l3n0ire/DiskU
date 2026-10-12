@@ -97,31 +97,3 @@ import Testing
     #expect(scanned.url.standardizedFileURL == second.standardizedFileURL)
     #expect(scanned.size == 13 * 4096)
 }
-
-@MainActor
-@Test func clickingAFolderHeaderCollapsesAndExpandsIt() async throws {
-    let root = try makeFixture()
-    defer { try? FileManager.default.removeItem(at: root) }
-    let store = DiskStore(trasher: { _ in })
-    store.finish(try await Scanner.scan(root))
-    let size = CGSize(width: 400, height: 300)
-    let names = { (layout: TreemapLayout) in Set(layout.tiles.map(\.node.name)) }
-
-    let open = try #require(store.layout(for: size))
-    let photosTile = try #require(open.tiles.first { $0.node.name == "photos" })
-    let header = try #require(photosTile.header)
-    let photos = try #require(open.folderHeader(at: CGPoint(x: header.midX, y: header.midY)))
-    #expect(photos.name == "photos")
-    #expect(names(open).isSuperset(of: ["a.png", "b.jpg", "deep", "notes.txt"]))
-
-    store.toggleCollapsed(photos)
-    let closed = try #require(store.layout(for: size))
-    let collapsedTile = try #require(closed.tiles.first { $0.node === photos })
-    guard case .collapsed = collapsedTile.role else { Issue.record("photos is not collapsed"); return }
-    #expect(collapsedTile.rect == photosTile.rect)
-    #expect(names(closed).isDisjoint(with: ["a.png", "b.jpg", "deep", "notes.txt"]))
-    #expect(closed.tile(at: CGPoint(x: collapsedTile.rect.midX, y: collapsedTile.rect.maxY - 2))?.node === photos)
-
-    store.toggleCollapsed(photos)
-    #expect(names(try #require(store.layout(for: size))) == names(open))
-}

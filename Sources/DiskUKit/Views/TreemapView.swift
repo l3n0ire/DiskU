@@ -7,8 +7,7 @@ struct TreemapView: View {
         GeometryReader { geometry in
             if let layout = store.layout(for: geometry.size) {
                 ZStack {
-                    TreemapCanvas(layout: layout, revision: store.revision, rootID: store.displayRoot.map(ObjectIdentifier.init),
-                                  collapsed: store.collapsed)
+                    TreemapCanvas(layout: layout, revision: store.revision, rootID: store.displayRoot.map(ObjectIdentifier.init))
                         .equatable()
                     HighlightCanvas(layout: layout, selection: store.selection, hovered: store.hovered)
                 }
@@ -20,12 +19,7 @@ struct TreemapView: View {
                     }
                 }
                 .gesture(SpatialTapGesture().onEnded { value in
-                    if let folder = layout.folderHeader(at: value.location), folder !== store.displayRoot {
-                        store.toggleCollapsed(folder)
-                        store.selection = folder
-                    } else {
-                        store.selection = layout.tile(at: value.location)?.node
-                    }
+                    store.selection = layout.tile(at: value.location)?.node
                 })
                 .simultaneousGesture(SpatialTapGesture(count: 2).onEnded { value in
                     if let tile = layout.tile(at: value.location) { store.zoom(into: tile.node) }
@@ -45,10 +39,9 @@ private struct TreemapCanvas: View, Equatable {
     let layout: TreemapLayout
     let revision: Int
     let rootID: ObjectIdentifier?
-    let collapsed: Set<FileNode>
 
     static func == (a: Self, b: Self) -> Bool {
-        a.revision == b.revision && a.rootID == b.rootID && a.collapsed == b.collapsed
+        a.revision == b.revision && a.rootID == b.rootID
             && a.layout.tiles.first?.rect == b.layout.tiles.first?.rect
     }
 
@@ -63,14 +56,10 @@ private struct TreemapCanvas: View, Equatable {
         switch tile.role {
         case .folder(let header):
             context.fill(Path(rect), with: .color(Palette.folderFill(depth: tile.depth)))
-            drawHeader(header, of: tile, open: true, context: &context)
-        case .collapsed(let header):
-            cushion(rect, kind: nil, context: &context)
-            drawHeader(header, of: tile, open: false, context: &context)
-            let body = header.map { rect.divided(atDistance: $0.maxY - rect.minY, from: .minYEdge).remainder } ?? rect
-            if body.width > 56, body.height > 30 {
-                drawLabel(Format.items(tile.node.itemCount), detail: "Click the title to expand",
-                          in: body.insetBy(dx: 6, dy: 5), size: 11, weight: .medium, context: &context, stacked: true)
+            if let header {
+                context.fill(Path(header), with: .color(Palette.headerFill(depth: tile.depth)))
+                drawLabel(tile.node.name, detail: Format.bytes(tile.node.size), in: header.insetBy(dx: 4, dy: 0),
+                          size: 10.5, weight: .semibold, context: &context)
             }
         case .leaf:
             let kind = tile.node.isFolder ? nil : tile.node.kind
@@ -82,14 +71,6 @@ private struct TreemapCanvas: View, Equatable {
         case .remainder:
             context.fill(Path(rect), with: .color(Palette.remainder))
         }
-    }
-
-    private func drawHeader(_ header: CGRect?, of tile: TreemapTile, open: Bool, context: inout GraphicsContext) {
-        guard let header else { return }
-        context.fill(Path(header), with: .color(Palette.headerFill(depth: tile.depth)))
-        let name = tile.depth == 0 ? tile.node.name : "\(open ? "▾" : "▸") \(tile.node.name)"
-        drawLabel(name, detail: Format.bytes(tile.node.size),
-                  in: header.insetBy(dx: 4, dy: 0), size: 10.5, weight: .semibold, context: &context)
     }
 
     /// Cushion-like shading: a diagonal highlight-to-shadow ramp of the kind color.

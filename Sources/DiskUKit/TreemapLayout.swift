@@ -1,8 +1,7 @@
 import CoreGraphics
 
 public struct TreemapTile {
-    /// A `.collapsed` folder is drawn as one block; its contents are not laid out.
-    public enum Role { case folder(header: CGRect?), collapsed(header: CGRect?), leaf, remainder }
+    public enum Role { case folder(header: CGRect?), leaf, remainder }
 
     /// For `.remainder`, the folder whose sub-pixel children were folded into this tile.
     public let node: FileNode
@@ -21,9 +20,9 @@ public struct TreemapLayout {
 
     public let tiles: [TreemapTile]
 
-    public init(root: FileNode, in bounds: CGRect, collapsed: Set<FileNode> = []) {
+    public init(root: FileNode, in bounds: CGRect) {
         var tiles: [TreemapTile] = []
-        Self.place(root, in: bounds, depth: 0, collapsed: collapsed, into: &tiles)
+        Self.place(root, in: bounds, depth: 0, into: &tiles)
         self.tiles = tiles
     }
 
@@ -31,17 +30,11 @@ public struct TreemapLayout {
         tiles.last { $0.rect.contains(point) }
     }
 
-    /// The folder whose header bar contains the point, if any.
-    public func folderHeader(at point: CGPoint) -> FileNode? {
-        tiles.last { $0.header?.contains(point) ?? false }?.node
-    }
-
     public func rect(of node: FileNode) -> CGRect? {
         tiles.first { $0.node === node && !$0.isRemainder }?.rect
     }
 
-    private static func place(_ node: FileNode, in rect: CGRect, depth: Int, collapsed: Set<FileNode>,
-                              into tiles: inout [TreemapTile]) {
+    private static func place(_ node: FileNode, in rect: CGRect, depth: Int, into tiles: inout [TreemapTile]) {
         guard rect.width >= 1, rect.height >= 1 else { return }
         guard node.isFolder, !node.children.isEmpty, node.size > 0 else {
             tiles.append(TreemapTile(node: node, rect: rect, depth: depth, role: .leaf))
@@ -57,10 +50,6 @@ public struct TreemapLayout {
                 content = content.divided(atDistance: headerHeight, from: .minYEdge).remainder
             }
         }
-        if depth > 0, collapsed.contains(node) {
-            tiles.append(TreemapTile(node: node, rect: rect, depth: depth, role: .collapsed(header: header)))
-            return
-        }
         tiles.append(TreemapTile(node: node, rect: rect, depth: depth, role: .folder(header: header)))
 
         let scale = Double(content.width * content.height) / Double(node.size)
@@ -71,7 +60,7 @@ public struct TreemapLayout {
 
         let rects = squarify(sizes: sizes, in: content)
         for (child, childRect) in zip(visible, rects) {
-            place(child, in: childRect, depth: depth + 1, collapsed: collapsed, into: &tiles)
+            place(child, in: childRect, depth: depth + 1, into: &tiles)
         }
         if rest > 0, let restRect = rects.last, restRect.width >= 1, restRect.height >= 1 {
             tiles.append(TreemapTile(node: node, rect: restRect, depth: depth + 1, role: .remainder))
@@ -81,11 +70,4 @@ public struct TreemapLayout {
 
 extension TreemapTile {
     public var isRemainder: Bool { if case .remainder = role { true } else { false } }
-
-    public var header: CGRect? {
-        switch role {
-        case .folder(let header), .collapsed(let header): header
-        case .leaf, .remainder: nil
-        }
-    }
 }
