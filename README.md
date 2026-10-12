@@ -47,6 +47,8 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
+Add a `## vX.Y.Z` section to `CHANGELOG.md` before tagging. The release notes are that section plus install instructions (`scripts/release-notes.sh vX.Y.Z` previews them), and the release fails if the section is missing.
+
 The workflow runs the tests, then `scripts/release.sh`, which you can also run locally (`scripts/release.sh v1.0.0` writes `dist/DiskU-1.0.0.zip`). Tags must look like `v1.2.3`, and the tagged commit must be on `main`.
 
 The app is ad-hoc signed and not notarized, so first-time users need the **Open Anyway** step in [Install](#install).

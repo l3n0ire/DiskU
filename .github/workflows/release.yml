@@ -23,6 +23,9 @@ jobs:
             exit 1
           fi
 
+      - name: Write release notes from CHANGELOG.md
+        run: scripts/release-notes.sh "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"
+
       - name: Test and build
         id: build
         run: echo "zip=$(scripts/release.sh "$GITHUB_REF_NAME" | tail -1)" >> "$GITHUB_OUTPUT"
@@ -33,5 +36,5 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" "${{ steps.build.outputs.zip }}" \
             --title "DiskU ${GITHUB_REF_NAME#v}" \
-            --generate-notes \
-            --notes "DiskU is not signed. After unzipping and opening DiskU.app, go to System Settings > Privacy & Security, scroll to the bottom, find DiskU, and click \"Open Anyway\". Runs on Apple Silicon and Intel Macs."
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            --generate-notes

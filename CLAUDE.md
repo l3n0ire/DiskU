@@ -6,7 +6,7 @@ A native macOS disk-usage visualizer (SwiftUI, SwiftPM, macOS 14+). See `README.
 
 - **Build and test only through `scripts/swift.sh`** (`scripts/swift.sh build`, `scripts/swift.sh test`, `scripts/swift.sh run -c release diskusnap ...`). Plain `swift` fails on this machine's Command Line Tools. `docs/toolchain.md` explains why and when the wrapper can go.
 - **Bundle the app with `scripts/bundle.sh`.** It writes an ad-hoc signed `DiskU.app` at the repo root. The icon is `Resources/AppIcon.icns`, generated from `Resources/AppIcon.png` by `scripts/make-icon.swift`. Never edit the `.icns` by hand.
-- **Releases come from version tags** (`vX.Y.Z` on `main`) via `.github/workflows/release.yml`, which runs `scripts/release.sh`. Change the release steps in that script, not the workflow, so they stay runnable locally.
+- **Releases come from version tags** (`vX.Y.Z` on `main`) via `.github/workflows/release.yml`, which runs `scripts/release.sh`. Change the release steps in that script, not the workflow, so they stay runnable locally. Every release needs a `## vX.Y.Z` section in `CHANGELOG.md` written for users; `scripts/release-notes.sh` turns it into the release notes.
 - **Never trash or delete real user files while testing.** Tests inject a recording trasher (`DiskStore(trasher:)`). Manual checks use the fixture from `scripts/make-fixture.sh` inside a scratch directory.
 - **Every polling loop in a test needs a deadline** (see `cancelledScanDoesNotOverwriteItsReplacement` in `DiskStoreTests.swift`). A loop without one once hung the whole suite for minutes.
 - **Prove UI changes with the `verify-disku` skill** (`.claude/skills/verify-disku/`). Say plainly which parts you could not drive.
