@@ -21,6 +21,13 @@ scripts/bundle.sh
 open DiskU.app
 ```
 
+The app icon comes from `Resources/AppIcon.png`. After replacing that image, regenerate `Resources/AppIcon.icns` and rebundle:
+
+```sh
+SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk swift scripts/make-icon.swift "$PWD"
+scripts/bundle.sh
+```
+
 ## Using it
 
 - **Scan.** Use the toolbar's Home or Scan… buttons. Scanning shows live progress and can be cancelled.
