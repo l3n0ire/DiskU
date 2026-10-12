@@ -28,6 +28,19 @@ SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.sdk swift scripts/make
 scripts/bundle.sh
 ```
 
+## Releases
+
+Pushing a version tag on `main` builds and publishes a GitHub release with `DiskU-X.Y.Z.zip` (`.github/workflows/release.yml`):
+
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow runs the tests, then `scripts/release.sh`, which you can also run locally (`scripts/release.sh v1.0.0` writes `dist/DiskU-1.0.0.zip`). Tags must look like `v1.2.3`, and the tagged commit must be on `main`.
+
+The app is ad-hoc signed and not notarized, so macOS blocks it the first time. Right-click `DiskU.app` and choose Open, or run `xattr -dr com.apple.quarantine DiskU.app`.
+
 ## Using it
 
 - **Scan.** Use the toolbar's Home or Scan… buttons. Scanning shows live progress and can be cancelled.

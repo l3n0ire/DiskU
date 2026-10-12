@@ -3,3 +3,4 @@
 .swiftpm/
 .DS_Store
 *.zip
+dist/

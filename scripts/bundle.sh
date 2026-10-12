@@ -1,7 +1,10 @@
 #!/bin/zsh
 # Builds release binaries and assembles an ad-hoc signed DiskU.app at the repo root.
+# DISKU_VERSION (default 1.0) and DISKU_BUILD (default 1) set the version shown in Finder.
 set -euo pipefail
 cd "${0:A:h}/.."
+version=${DISKU_VERSION:-1.0}
+build=${DISKU_BUILD:-1}
 
 scripts/swift.sh build -c release --product DiskU
 binary=$(scripts/swift.sh build -c release --show-bin-path)/DiskU
@@ -22,8 +25,8 @@ cat > $app/Contents/Info.plist <<PLIST
   <key>CFBundleExecutable</key><string>DiskU</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.0</string>
-  <key>CFBundleVersion</key><string>1</string>
+  <key>CFBundleShortVersionString</key><string>$version</string>
+  <key>CFBundleVersion</key><string>$build</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
   <key>NSHighResolutionCapable</key><true/>
