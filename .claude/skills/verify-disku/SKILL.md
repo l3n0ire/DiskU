@@ -32,7 +32,7 @@ Open each PNG with the Read tool and check it yourself:
 - Folders nest with readable headers, colors match the legend, and labels are legible.
 - With `--zoom`, the breadcrumb shows the zoomed folder.
 
-For real data, render `~` and `~/Library` as well. When scanning `/`, the total should come in below the "used" figure from `df -h /`. A total above it means a path is counted twice.
+For real data, render `~` and `~/Library` as well. If you render `/` (diskusnap accepts any folder), the total should come in below the "used" figure from `df -h /`. A total above it means a path is counted twice.
 
 Known capture limits that are not app bugs:
 

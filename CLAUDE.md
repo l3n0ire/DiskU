@@ -24,7 +24,7 @@ A native macOS disk-usage visualizer (SwiftUI, SwiftPM, macOS 14+). See `README.
 - **Scan status is the single `ScanState` enum** (`idle`, `scanning`, `done`, `failed`). Views switch on it. Don't add parallel booleans such as `isScanning`.
 - **A replaced or cancelled scan must not write state.** `DiskStore` tags each scan with a generation number and drops results and progress from older ones.
 - **Deleting means moving to the Trash** (`FileManager.trashItem`) after a confirmation that names the item and its size. Never add a permanent delete.
-- **The scanner does not follow symlinks or cross volumes.** When scanning `/` it skips `/System/Volumes`, `/Volumes`, `/.nofollow`, `/.resolve`, `/.vol` and `/dev`. `/.nofollow` and `/.resolve` re-list the whole disk and would double count it.
+- **The scanner does not follow symlinks or cross volumes.** There is no whole-disk button, but `/` can still be picked in the folder chooser. When scanning `/` it skips `/System/Volumes`, `/Volumes`, `/.nofollow`, `/.resolve`, `/.vol` and `/dev`. `/.nofollow` and `/.resolve` re-list the whole disk and would double count it.
 
 ## Known gaps
 
