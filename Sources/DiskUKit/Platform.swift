@@ -49,6 +49,17 @@ public enum Actions {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
     }
 
+    /// The Full Disk Access list has no way to add an app from code, so show the bundle for dragging in.
+    public static func revealAppBundle() {
+        NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+    }
+
+    /// macOS has no API to ask whether Full Disk Access is granted. The TCC database is readable only
+    /// with it, so opening the file is the standard probe.
+    public static var hasFullDiskAccess: Bool {
+        FileHandle(forReadingAtPath: "/Library/Application Support/com.apple.TCC/TCC.db") != nil
+    }
+
     public static func chooseFolder() -> URL? {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true

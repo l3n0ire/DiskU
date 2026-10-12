@@ -3,7 +3,9 @@ import DiskUKit
 import SwiftUI
 
 /// diskusnap <dir> <out.png> [--renderer window|image] [--zoom]
+/// diskusnap --home <out.png>
 /// Scans <dir> with the real scanner, selects its largest child, and renders the real browser view.
+/// With --home it skips scanning and renders the home screen instead.
 @main
 struct DiskUSnap {
     static let size = CGSize(width: 1400, height: 900)
@@ -11,6 +13,15 @@ struct DiskUSnap {
     @MainActor
     static func main() async {
         var args = Array(CommandLine.arguments.dropFirst())
+        if args.count == 2, args[0] == "--home" {
+            let view = ContentView().environment(DiskStore())
+                .frame(width: size.width, height: size.height)
+                .background(Color(white: 0.12))
+            guard let png = renderInWindow(view)?.representation(using: .png, properties: [:]) else { exit(1) }
+            try! png.write(to: URL(fileURLWithPath: args[1]))
+            print("wrote \(args[1]) (Full Disk Access: \(Actions.hasFullDiskAccess ? "on" : "off"))")
+            return
+        }
         let zoom = args.contains("--zoom")
         args.removeAll { $0 == "--zoom" }
         var renderer = "window"
@@ -19,7 +30,7 @@ struct DiskUSnap {
             args.removeSubrange(index...index + 1)
         }
         guard args.count == 2 else {
-            FileHandle.standardError.write(Data("usage: diskusnap <dir> <out.png> [--renderer window|image] [--zoom]\n".utf8))
+            FileHandle.standardError.write(Data("usage: diskusnap <dir> <out.png> [--renderer window|image] [--zoom]\n       diskusnap --home <out.png>\n".utf8))
             exit(64)
         }
         let dir = URL(fileURLWithPath: (args[0] as NSString).expandingTildeInPath)

@@ -58,6 +58,7 @@ macOS hides some folders (Mail, Messages, Safari, other apps' containers, parts 
 scripts/swift.sh run -c release diskusnap ~ /tmp/home.png            # full window, offscreen
 scripts/swift.sh run -c release diskusnap ~ /tmp/home.png --zoom     # zoomed into the largest folder
 scripts/swift.sh run -c release diskusnap ~ /tmp/tm.png --renderer image  # ImageRenderer, treemap pane only
+scripts/swift.sh run -c release diskusnap --home /tmp/home-screen.png      # home screen, no scan
 scripts/make-fixture.sh /tmp/fixture                        # 106,958,848-byte fixture with a symlink loop
 ```
 

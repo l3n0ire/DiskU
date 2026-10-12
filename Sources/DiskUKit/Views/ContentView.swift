@@ -185,6 +185,39 @@ struct FullDiskAccessBanner: View {
     }
 }
 
+struct FullDiskAccessCard: View {
+    @State private var granted = Actions.hasFullDiskAccess
+
+    var body: some View {
+        Group {
+            if granted {
+                Label("Full Disk Access is on. DiskU can read every folder without asking.", systemImage: "checkmark.shield.fill")
+                    .foregroundStyle(.green)
+            } else {
+                VStack(spacing: 10) {
+                    Label("Allow Full Disk Access", systemImage: "lock.shield.fill")
+                        .font(.headline)
+                    Text("Without it, macOS asks before DiskU reads Desktop, Documents, Downloads, and other protected folders, and some sizes stay incomplete. Turn on DiskU in the list once and the prompts stop. If DiskU isn’t listed, drag it in from Finder.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 460)
+                    HStack {
+                        Button("Open Full Disk Access Settings") { Actions.openFullDiskAccessSettings() }
+                            .buttonStyle(.borderedProminent)
+                        Button("Show DiskU in Finder") { Actions.revealAppBundle() }
+                    }
+                }
+                .padding(18)
+                .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            granted = Actions.hasFullDiskAccess
+        }
+    }
+}
+
 struct ScanToolbar: ToolbarContent {
     @Environment(DiskStore.self) private var store
 
@@ -227,6 +260,8 @@ struct WelcomeView: View {
                 }
             }
             .controlSize(.large)
+            FullDiskAccessCard()
+                .padding(.top, 12)
         }
         .padding(40)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
