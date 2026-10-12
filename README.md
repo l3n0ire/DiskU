@@ -6,12 +6,12 @@ Requires macOS 14 or later.
 
 ## Build and run
 
-With a working SwiftPM:
+`scripts/swift.sh` runs `swift` with the workarounds the Command Line Tools need (it pins the macOS 26 SDK and passes the Swift Testing plugin path). With full Xcode selected it runs plain `swift`.
 
 ```sh
-swift build
-swift test
-swift run DiskU
+scripts/swift.sh build
+scripts/swift.sh test
+scripts/swift.sh run DiskU
 ```
 
 Build the app bundle (`DiskU.app` at the repo root, ad-hoc signed):
@@ -19,14 +19,6 @@ Build the app bundle (`DiskU.app` at the repo root, ad-hoc signed):
 ```sh
 scripts/bundle.sh
 open DiskU.app
-```
-
-If `swift build` fails before compiling anything (for example `swift-package` cannot load `llbuild` because the Command Line Tools install is mismatched), `scripts/build.sh` compiles the same targets with `swiftc` directly, and `scripts/bundle.sh` falls back to it automatically:
-
-```sh
-scripts/build.sh            # debug build into .build/swiftc/debug
-scripts/build.sh release    # optimized build into .build/swiftc/release
-scripts/build.sh test       # builds and runs the Swift Testing suite
 ```
 
 ## Using it
@@ -56,9 +48,9 @@ macOS hides some folders (Mail, Messages, Safari, other apps' containers, parts 
 `diskusnap` scans a folder with the real scanner and renders the real browser view to a PNG, with the largest item selected. It also prints the scan time and file count.
 
 ```sh
-.build/swiftc/release/diskusnap ~ /tmp/home.png            # full window, offscreen
-.build/swiftc/release/diskusnap ~ /tmp/home.png --zoom     # zoomed into the largest folder
-.build/swiftc/release/diskusnap ~ /tmp/tm.png --renderer image  # ImageRenderer, treemap pane only
+scripts/swift.sh run -c release diskusnap ~ /tmp/home.png            # full window, offscreen
+scripts/swift.sh run -c release diskusnap ~ /tmp/home.png --zoom     # zoomed into the largest folder
+scripts/swift.sh run -c release diskusnap ~ /tmp/tm.png --renderer image  # ImageRenderer, treemap pane only
 scripts/make-fixture.sh /tmp/fixture                        # 106,958,848-byte fixture with a symlink loop
 ```
 

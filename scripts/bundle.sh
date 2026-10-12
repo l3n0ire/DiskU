@@ -3,13 +3,8 @@
 set -euo pipefail
 cd "${0:A:h}/.."
 
-if swift build -c release --product DiskU >/dev/null 2>&1; then
-  binary=$(swift build -c release --show-bin-path)/DiskU
-else
-  echo "swift build unavailable; building with scripts/build.sh" >&2
-  scripts/build.sh release
-  binary=.build/swiftc/release/DiskU
-fi
+scripts/swift.sh build -c release --product DiskU
+binary=$(scripts/swift.sh build -c release --show-bin-path)/DiskU
 
 app=DiskU.app
 rm -rf $app
