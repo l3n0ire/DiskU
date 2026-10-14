@@ -1,6 +1,6 @@
 # DiskU
 
-DiskU is a native macOS disk-usage visualizer in the spirit of Disk Inventory X. It scans your home folder or a folder you choose, draws every file as a rectangle sized by the space it occupies, and lets you inspect, Quick Look, reveal, or move items to the Trash.
+DiskU is a native macOS disk-usage visualizer in the spirit of Disk Inventory X. It scans your home folder, your whole disk, or a folder you choose, draws every file as a rectangle sized by the space it occupies, and lets you inspect, Quick Look, reveal, or move items to the Trash.
 
 ![DiskU showing a scanned home folder as a treemap](docs/screenshot.png)
 
@@ -68,7 +68,7 @@ open DiskU.app --args /Users/Shared/DiskU-Demo/Home
 
 ## Using it
 
-- **Scan.** Use the toolbar's Home or Scan… buttons. Scanning shows live progress and can be cancelled.
+- **Scan.** Use the toolbar's Home, Full Disk, or Scan… buttons. Scanning shows live progress and can be cancelled.
 - **Outline (left).** Items are sorted by size. Each row has a bar showing its share of the parent folder.
 - **Treemap (center).** Click to select, double-click to zoom into a folder, and use the breadcrumb bar to zoom back out. Hovering shows the path in the status bar.
 - **Inspector (right).** Shows details for the selection, a legend of space used by kind, and the Reveal, Quick Look, Open, Copy Path (⌥⌘C), and Move to Trash actions.

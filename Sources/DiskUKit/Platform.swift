@@ -140,6 +140,7 @@ enum ToolbarTooltips {
         "Rescan": "Scan the last folder again (⌘R)",
         "Cancel": "Stop scanning",
         "Home": "Scan your home folder (⇧⌘H)",
+        "Full Disk": "Scan the whole startup disk",
         "Scan…": "Choose a folder to scan (⌘O)",
     ]
 

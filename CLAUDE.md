@@ -27,7 +27,7 @@ A native macOS disk-usage visualizer (SwiftUI, SwiftPM, macOS 14+). See `README.
 - **Toolbar tooltips live in `ToolbarTooltips.byLabel`** (`Platform.swift`), keyed by the button label. SwiftUI `.help` on toolbar buttons does not show on macOS 26. A new toolbar button needs an entry there.
 - **The sidebar never lists a whole folder at once.** `DiskStore.outlineLimits` caps each folder at its largest `outlinePage` children behind a "Show more" row, and selecting a hidden item lifts the cap. SwiftUI builds every row of an expanded `List` group up front (5,000 rows took about 30 s), so keep rows cheap: `Icons.outlineIcon` shares icons per file type, and no `GeometryReader` per row.
 - **Deleting means moving to the Trash** (`FileManager.trashItem`) after a confirmation that names the item and its size. Never add a permanent delete.
-- **The scanner does not follow symlinks or cross volumes.** There is no whole-disk button, but `/` can still be picked in the folder chooser. When scanning `/` it skips `/System/Volumes`, `/Volumes`, `/.nofollow`, `/.resolve`, `/.vol` and `/dev`. `/.nofollow` and `/.resolve` re-list the whole disk and would double count it.
+- **The scanner does not follow symlinks or cross volumes.** The Full Disk button scans `/`. When scanning `/` it skips `/System/Volumes`, `/Volumes`, `/.nofollow`, `/.resolve`, `/.vol` and `/dev`. `/.nofollow` and `/.resolve` re-list the whole disk and would double count it.
 
 ## Known gaps
 

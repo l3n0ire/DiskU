@@ -11,6 +11,7 @@ public struct DiskUCommands: Commands {
                 .keyboardShortcut("o")
             Button("Scan Home Folder") { store.scan(FileManager.default.homeDirectoryForCurrentUser) }
                 .keyboardShortcut("h", modifiers: [.command, .shift])
+            Button("Scan Full Disk") { store.scan(URL(fileURLWithPath: "/")) }
             Button("Rescan") { store.rescan() }
                 .keyboardShortcut("r")
                 .disabled(store.lastScanned == nil)

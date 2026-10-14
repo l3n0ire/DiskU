@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Scan Full Disk.** A new Full Disk button in the toolbar, on the start screen, and in the File menu scans your whole startup disk.
 - **Faster sidebar for big folders.** Opening a folder with thousands of items no longer freezes DiskU. The sidebar lists each folder's 100 largest items, followed by a row showing how many smaller items are hidden and how much space they take, with a **Show more** button.
 
 ## v1.0.2

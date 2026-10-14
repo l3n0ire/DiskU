@@ -232,6 +232,9 @@ struct ScanToolbar: ToolbarContent {
             Button { store.scan(FileManager.default.homeDirectoryForCurrentUser) } label: {
                 Label("Home", systemImage: "house")
             }
+            Button { store.scan(URL(fileURLWithPath: "/")) } label: {
+                Label("Full Disk", systemImage: "internaldrive")
+            }
             Button { if let url = Actions.chooseFolder() { store.scan(url) } } label: {
                 Label("Scan…", systemImage: "folder.badge.gearshape")
             }
@@ -255,6 +258,9 @@ struct WelcomeView: View {
                     Label("Scan Home Folder", systemImage: "house").frame(minWidth: 150)
                 }
                 .buttonStyle(.borderedProminent)
+                Button { store.scan(URL(fileURLWithPath: "/")) } label: {
+                    Label("Scan Full Disk", systemImage: "internaldrive").frame(minWidth: 150)
+                }
                 Button { if let url = Actions.chooseFolder() { store.scan(url) } } label: {
                     Label("Choose Folder…", systemImage: "folder").frame(minWidth: 150)
                 }
