@@ -19,6 +19,7 @@ public struct ContentView: View {
                 BrowserView(root: root, inaccessible: inaccessible)
             }
         }
+        .safeAreaInset(edge: .top, spacing: 0) { UpdateBanner() }
         .frame(minWidth: 900, minHeight: 560)
         .toolbar { ScanToolbar() }
         .onKeyPress(.space) {
@@ -229,6 +230,28 @@ extension FullDiskAccessCard {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
             Text("\(number).").monospacedDigit()
             Text(text)
+        }
+    }
+}
+
+struct UpdateBanner: View {
+    @Environment(UpdateChecker.self) private var updates: UpdateChecker?
+
+    var body: some View {
+        if let updates, let release = updates.available, !updates.dismissed {
+            HStack(spacing: 10) {
+                Image(systemName: "arrow.down.circle.fill").foregroundStyle(.tint)
+                Text("DiskU \(release.version.description) is available.").fontWeight(.medium)
+                Spacer()
+                Button("View Release") { NSWorkspace.shared.open(release.url) }
+                Button { updates.dismissed = true } label: { Image(systemName: "xmark") }
+                    .buttonStyle(.borderless)
+                    .help("Dismiss")
+            }
+            .font(.callout)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(.tint.opacity(0.12))
         }
     }
 }

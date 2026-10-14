@@ -53,6 +53,8 @@ The workflow runs the tests, then `scripts/release.sh`, which you can also run l
 
 The app is ad-hoc signed and not notarized, so first-time users need the **Open Anyway** step in [Install](#install).
 
+DiskU checks GitHub for a newer release each time it opens and shows a banner with a link when one is available. It never downloads or installs anything on its own.
+
 To scan a folder at launch, pass it as an argument:
 
 ```sh

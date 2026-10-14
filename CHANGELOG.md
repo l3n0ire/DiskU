@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Update notices.** DiskU checks GitHub for a newer release when it opens and shows a banner linking to it.
+
 ## v1.0.3
 
 - **Scan Full Disk.** A new Full Disk button in the toolbar, on the start screen, and in the File menu scans your whole startup disk.

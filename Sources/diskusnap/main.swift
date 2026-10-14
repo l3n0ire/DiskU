@@ -3,7 +3,7 @@ import DiskUKit
 import SwiftUI
 
 /// diskusnap <dir> <out.png> [--renderer window|image] [--zoom]
-/// diskusnap --home <out.png>
+/// diskusnap --home <out.png> [--pretend-version X.Y.Z]
 /// Scans <dir> with the real scanner, selects its largest child, and renders the real browser view.
 /// With --home it skips scanning and renders the home screen instead.
 @main
@@ -13,8 +13,14 @@ struct DiskUSnap {
     @MainActor
     static func main() async {
         var args = Array(CommandLine.arguments.dropFirst())
-        if args.count == 2, args[0] == "--home" {
-            let view = ContentView().environment(DiskStore())
+        if args.first == "--home", args.count >= 2 {
+            // --pretend-version 1.0.0 runs the real GitHub update check as if this were that version.
+            let updates = UpdateChecker()
+            if let index = args.firstIndex(of: "--pretend-version"), index + 1 < args.count, let version = Version(args[index + 1]) {
+                await updates.check(current: version)
+                print("latest release newer than \(version): \(updates.available.map { "\($0.version) \($0.url)" } ?? "none")")
+            }
+            let view = ContentView().environment(DiskStore()).environment(updates)
                 .frame(width: size.width, height: size.height)
                 .background(Color(white: 0.12))
             guard let png = renderInWindow(view)?.representation(using: .png, properties: [:]) else { exit(1) }
@@ -30,7 +36,7 @@ struct DiskUSnap {
             args.removeSubrange(index...index + 1)
         }
         guard args.count == 2 else {
-            FileHandle.standardError.write(Data("usage: diskusnap <dir> <out.png> [--renderer window|image] [--zoom]\n       diskusnap --home <out.png>\n".utf8))
+            FileHandle.standardError.write(Data("usage: diskusnap <dir> <out.png> [--renderer window|image] [--zoom]\n       diskusnap --home <out.png> [--pretend-version X.Y.Z]\n".utf8))
             exit(64)
         }
         let dir = URL(fileURLWithPath: (args[0] as NSString).expandingTildeInPath)

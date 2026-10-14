@@ -5,12 +5,15 @@ import SwiftUI
 struct DiskUApp: App {
     @NSApplicationDelegateAdaptor(DiskUAppDelegate.self) private var delegate
     @State private var store = DiskStore()
+    @State private var updates = UpdateChecker()
 
     var body: some Scene {
         WindowGroup("DiskU") {
             ContentView()
                 .environment(store)
+                .environment(updates)
                 .task { if let folder = Self.launchFolder { store.scan(folder) } }
+                .task { await updates.check() }
         }
         .defaultSize(width: 1200, height: 800)
         .commands { DiskUCommands(store: store) }

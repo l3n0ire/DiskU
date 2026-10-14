@@ -1,10 +1,12 @@
 #!/bin/zsh
 # Builds a universal release binary and assembles an ad-hoc signed DiskU.app at the repo root.
-# DISKU_VERSION (default 1.0) and DISKU_BUILD (default 1) set the version shown in Finder.
+# DISKU_VERSION and DISKU_BUILD set the version shown in Finder; they default to the latest
+# vX.Y.Z tag and the commit count, so a local build never looks older than the last release.
 set -euo pipefail
 cd "${0:A:h}/.."
-version=${DISKU_VERSION:-1.0}
-build=${DISKU_BUILD:-1}
+latest_tag=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || echo v1.0)
+version=${DISKU_VERSION:-${latest_tag#v}}
+build=${DISKU_BUILD:-$(git rev-list --count HEAD)}
 
 # Universal binary so the app runs on both Apple Silicon and Intel Macs.
 arch=(--arch arm64 --arch x86_64)

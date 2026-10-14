@@ -32,7 +32,7 @@ Open each PNG with the Read tool and check it yourself:
 - Folders nest with readable headers, colors match the legend, and labels are legible.
 - With `--zoom`, the breadcrumb shows the zoomed folder.
 
-For home-screen changes, `diskusnap --home "$SCRATCH/home.png"` renders the start screen and prints whether Full Disk Access is on for the running process.
+For home-screen changes, `diskusnap --home "$SCRATCH/home.png"` renders the start screen and prints whether Full Disk Access is on for the running process. Add `--pretend-version 1.0.0` to run the real GitHub update check as that version and render the update banner.
 
 For real data, render `~` and `~/Library` as well. If you render `/` (diskusnap accepts any folder), the total should come in below the "used" figure from `df -h /`. A total above it means a path is counted twice.
 
