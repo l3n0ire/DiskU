@@ -206,7 +206,7 @@ struct FullDiskAccessCard: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: 390, alignment: .leading)
+                    .frame(maxWidth: 310, alignment: .leading)
                     HStack {
                         Button("Open Full Disk Access Settings") { Actions.openFullDiskAccessSettings() }
                             .buttonStyle(.borderedProminent)
