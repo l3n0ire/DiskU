@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.4
 
 - **Update notices.** DiskU checks GitHub for a newer release when it opens and shows a banner linking to it.
 
