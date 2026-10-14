@@ -18,6 +18,10 @@ public final class DiskStore {
     public var zoomRoot: FileNode?
     public var hovered: FileNode?
     public var expanded: Set<FileNode> = []
+    /// How many of a folder's children the outline lists; the rest sit behind a "show more" row.
+    public private(set) var outlineLimits: [FileNode: Int] = [:]
+    public static let outlinePage = 100
+    public static let outlineMorePage = 500
     public private(set) var lastScanned: URL?
     /// Item awaiting the user's confirmation before it goes to the Trash.
     public var pendingTrash: FileNode?
@@ -47,6 +51,7 @@ public final class DiskStore {
         zoomRoot = nil
         hovered = nil
         expanded = []
+        outlineLimits = [:]
         state = .scanning(progress: ScanProgress())
         scanGeneration += 1
         let generation = scanGeneration
@@ -135,8 +140,24 @@ public final class DiskStore {
         return sorted
     }
 
+    public func outlineLimit(for folder: FileNode) -> Int {
+        outlineLimits[folder] ?? Self.outlinePage
+    }
+
+    public func showMore(in folder: FileNode) {
+        outlineLimits[folder] = outlineLimit(for: folder) + Self.outlineMorePage
+    }
+
+    /// Opens every ancestor and lifts any outline limit that would hide the node.
     private func expandAncestors(of node: FileNode) {
         let missing = node.ancestors.filter { !expanded.contains($0) }
         if !missing.isEmpty { expanded.formUnion(missing) }
+        var child = node
+        while let parent = child.parent {
+            if let index = parent.children.firstIndex(where: { $0 === child }), index >= outlineLimit(for: parent) {
+                outlineLimits[parent] = index + 1
+            }
+            child = parent
+        }
     }
 }

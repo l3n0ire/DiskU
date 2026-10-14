@@ -1,6 +1,7 @@
 import AppKit
 import Quartz
 import SwiftUI
+import UniformTypeIdentifiers
 
 public enum Format {
     private static let byteFormatter: ByteCountFormatter = {
@@ -27,6 +28,19 @@ enum Icons {
         if let cached = cache.object(forKey: url.path as NSString) { return cached }
         let image = NSWorkspace.shared.icon(forFile: url.path)
         cache.setObject(image, forKey: url.path as NSString)
+        return image
+    }
+
+    /// Icon for a sidebar row. Asking Finder for each file's own icon costs disk I/O per row, so
+    /// plain files and nested folders share one icon per type. Bundles and the scan root's direct
+    /// children (Desktop, Downloads, ...) keep their custom icons.
+    static func outlineIcon(for node: FileNode) -> NSImage {
+        if node.kind == .bundle || node.parent?.parent == nil { return icon(for: node.url) }
+        let ext = node.isFolder ? "/folder" : node.url.pathExtension.lowercased()
+        if let cached = cache.object(forKey: ext as NSString) { return cached }
+        let type: UTType = node.isFolder ? .folder : UTType(filenameExtension: ext) ?? .data
+        let image = NSWorkspace.shared.icon(for: type)
+        cache.setObject(image, forKey: ext as NSString)
         return image
     }
 }

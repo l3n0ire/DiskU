@@ -30,7 +30,11 @@ private struct OutlineRows: View {
         ForEach(nodes) { node in
             if node.outlineChildren != nil {
                 DisclosureGroup(isExpanded: expansion(node)) {
-                    OutlineRows(nodes: node.children, revision: revision)
+                    let limit = store.outlineLimit(for: node)
+                    OutlineRows(nodes: Array(node.children.prefix(limit)), revision: revision)
+                    if node.children.count > limit {
+                        ShowMoreRow(folder: node, hidden: node.children[limit...])
+                    }
                 } label: {
                     OutlineRow(node: node)
                 }
@@ -54,7 +58,7 @@ struct OutlineRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Image(nsImage: Icons.icon(for: node.url))
+            Image(nsImage: Icons.outlineIcon(for: node))
                 .resizable()
                 .frame(width: 16, height: 16)
             VStack(alignment: .leading, spacing: 3) {
@@ -78,19 +82,42 @@ struct OutlineRow: View {
     }
 }
 
+/// Drawn in a Canvas rather than with a GeometryReader so rows skip a layout pass.
 struct ProportionBar: View {
     let fraction: Double
     let color: Color
 
     var body: some View {
-        Capsule()
-            .fill(Color.primary.opacity(0.1))
-            .frame(height: 3)
-            .overlay(alignment: .leading) {
-                GeometryReader { geometry in
-                    Capsule().fill(color).frame(width: max(2, geometry.size.width * fraction))
-                }
+        Canvas { context, size in
+            let track = CGRect(origin: .zero, size: size)
+            context.fill(Path(roundedRect: track, cornerRadius: size.height / 2), with: .color(.primary.opacity(0.1)))
+            let bar = CGRect(x: 0, y: 0, width: max(2, size.width * fraction), height: size.height)
+            context.fill(Path(roundedRect: bar, cornerRadius: size.height / 2), with: .color(color))
+        }
+        .frame(height: 3)
+    }
+}
+
+private struct ShowMoreRow: View {
+    @Environment(DiskStore.self) private var store
+    let folder: FileNode
+    let hidden: ArraySlice<FileNode>
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "ellipsis.circle").frame(width: 16)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("\(hidden.count.formatted()) smaller items")
+                Text(Format.bytes(hidden.reduce(0) { $0 + $1.size }))
+                    .font(.caption.monospacedDigit())
             }
+            .foregroundStyle(.secondary)
+            Spacer(minLength: 6)
+            Button("Show more") { store.showMore(in: folder) }
+                .buttonStyle(.link)
+                .help("Show the next \(min(hidden.count, DiskStore.outlineMorePage).formatted())")
+        }
+        .font(.callout)
     }
 }
 

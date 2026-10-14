@@ -97,3 +97,32 @@ import Testing
     #expect(scanned.url.standardizedFileURL == second.standardizedFileURL)
     #expect(scanned.size == 13 * 4096)
 }
+
+@MainActor
+@Test func outlineListsLargestChildrenFirstAndRevealsHiddenSelections() async throws {
+    let root = FileManager.default.temporaryDirectory.appendingPathComponent("DiskUOutline-\(UUID().uuidString)")
+    defer { try? FileManager.default.removeItem(at: root) }
+    let many = root.appendingPathComponent("many")
+    try FileManager.default.createDirectory(at: many, withIntermediateDirectories: true)
+    for i in 1...150 {
+        try Data(count: i * 4096).write(to: many.appendingPathComponent("f\(i).bin"))
+    }
+    let store = DiskStore(trasher: { _ in })
+    store.finish(try await Scanner.scan(root))
+    let folder = try #require(store.root?.children.first)
+
+    #expect(store.outlineLimit(for: folder) == 100)
+    #expect(folder.children.prefix(100).last?.name == "f51.bin")
+
+    let hidden = folder.children[119]
+    #expect(hidden.name == "f31.bin")
+    store.selection = hidden
+    #expect(store.outlineLimit(for: folder) == 120)
+
+    store.showMore(in: folder)
+    #expect(store.outlineLimit(for: folder) == 620)
+
+    store.scan(root)
+    #expect(store.outlineLimit(for: folder) == 100)
+    store.cancelScan()
+}

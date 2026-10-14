@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Faster sidebar for big folders.** Opening a folder with thousands of items no longer freezes DiskU. The sidebar lists each folder's 100 largest items, followed by a row showing how many smaller items are hidden and how much space they take, with a **Show more** button.
+
 ## v1.0.2
 
 - **Copy Path.** A new inspector button copies the selected item's full path. It's also in the right-click menu and the Item menu (⌥⌘C).
