@@ -200,8 +200,8 @@ struct FullDiskAccessCard: View {
                     Text("Scan your disk without the permission prompts.")
                         .font(.callout)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("1. Click **Open Full Disk Access Settings**.")
-                        Text("2. Turn on DiskU. If it isn’t listed, click **Show DiskU in Finder** and drag it into the list.")
+                        step(1, "Click **Open Full Disk Access Settings**.")
+                        step(2, "Turn on DiskU. If it isn’t listed, click **Show DiskU in Finder** and drag it into the list.")
                     }
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -219,6 +219,16 @@ struct FullDiskAccessCard: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             granted = Actions.hasFullDiskAccess
+        }
+    }
+}
+
+extension FullDiskAccessCard {
+    /// Number in its own column so wrapped lines indent under the text, not the number.
+    private func step(_ number: Int, _ text: LocalizedStringKey) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text("\(number).").monospacedDigit()
+            Text(text)
         }
     }
 }
