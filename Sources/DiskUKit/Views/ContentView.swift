@@ -197,11 +197,16 @@ struct FullDiskAccessCard: View {
                 VStack(spacing: 10) {
                     Label("Allow Full Disk Access", systemImage: "lock.shield.fill")
                         .font(.headline)
-                    Text("Without it, macOS asks before DiskU reads Desktop, Documents, Downloads, and other protected folders, and some sizes stay incomplete. Turn on DiskU in the list once and the prompts stop. If DiskU isn’t listed, drag it in from Finder.")
+                    Text("Scan your disk without the permission prompts.")
                         .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 460)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("1. Click **Open Full Disk Access Settings**.")
+                        Text("2. Turn on DiskU. If it isn’t listed, click **Show DiskU in Finder** and drag it into the list.")
+                    }
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: 390, alignment: .leading)
                     HStack {
                         Button("Open Full Disk Access Settings") { Actions.openFullDiskAccessSettings() }
                             .buttonStyle(.borderedProminent)
