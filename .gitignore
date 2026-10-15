@@ -1,6 +1,12 @@
 .build/
-*.app
+/*.app
 .swiftpm/
 .DS_Store
 *.zip
 dist/
+
+# Windows port
+windows/**/bin/
+windows/**/obj/
+windows/.vs/
+*.user
