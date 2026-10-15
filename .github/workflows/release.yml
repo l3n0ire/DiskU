@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  check:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -26,15 +26,80 @@ jobs:
       - name: Write release notes from CHANGELOG.md
         run: scripts/release-notes.sh "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notes
+          path: ${{ runner.temp }}/notes.md
+          if-no-files-found: error
+
+  macos:
+    needs: check
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # release.sh numbers the build by commit count
+
       - name: Test and build
         id: build
-        run: echo "zip=$(scripts/release.sh "$GITHUB_REF_NAME" | tail -1)" >> "$GITHUB_OUTPUT"
+        shell: bash # unlike the default shell, this sets pipefail, so a failed build fails the step
+        run: |
+          scripts/release.sh "$GITHUB_REF_NAME" | tee "$RUNNER_TEMP/release.log"
+          echo "zip=$(tail -1 "$RUNNER_TEMP/release.log")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: ${{ steps.build.outputs.zip }}
+          if-no-files-found: error
+
+  windows:
+    needs: check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test and build
+        id: build
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File windows/scripts/release.ps1 -Tag $env:GITHUB_REF_NAME | Tee-Object -Variable lines
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $x64, $arm64 = $lines | Select-Object -Last 2
+          if ($x64 -notlike '*-windows-x64.zip' -or $arm64 -notlike '*-windows-arm64.zip') { throw "Unexpected release.ps1 output: $x64 / $arm64" }
+          "x64=$x64" >> $env:GITHUB_OUTPUT
+          "arm64=$arm64" >> $env:GITHUB_OUTPUT
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            ${{ steps.build.outputs.x64 }}
+            ${{ steps.build.outputs.arm64 }}
+          if-no-files-found: error
+
+  publish:
+    needs: [macos, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "${{ steps.build.outputs.zip }}" \
-            --title "DiskU ${GITHUB_REF_NAME#v}" \
-            --notes-file "$RUNNER_TEMP/notes.md" \
+          version=${GITHUB_REF_NAME#v}
+          gh release create "$GITHUB_REF_NAME" \
+            "artifacts/macos/DiskU-$version-macos.zip" \
+            "artifacts/windows/DiskU-$version-windows-x64.zip" \
+            "artifacts/windows/DiskU-$version-windows-arm64.zip" \
+            --title "DiskU $version" \
+            --notes-file artifacts/notes/notes.md \
             --generate-notes

@@ -49,6 +49,16 @@ windows\scripts\package.ps1 -Version 1.0.5      # override the version from Dire
 
 The version defaults to `Version` in `Directory.Build.props`, which tracks the latest `CHANGELOG.md` entry.
 
+## Releasing
+
+Pushing a `vX.Y.Z` tag on `main` publishes one GitHub release with the Mac zip and both Windows zips (see the root `README.md`). The Windows job runs `release.ps1`, which you can run locally too:
+
+```powershell
+windows\scripts\release.ps1 -Tag v1.0.5   # tests, then windows\dist\DiskU-1.0.5-windows-x64.zip and -arm64.zip
+```
+
+It rejects tags that don't look like `v1.2.3`, stops on the first failure, and prints the two zip paths last.
+
 ## Other scripts
 
 - `make-fixture.ps1 <dir>`: port of `scripts/make-fixture.sh`. It writes 17 files of random data totalling 106,958,848 bytes (DiskU shows 107 MB) plus two links. Use a scratch directory. It refuses to replace a non-empty folder that isn't an earlier fixture.
