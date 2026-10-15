@@ -1,0 +1,246 @@
+<UserControl
+    x:Class="DiskU.App.BrowserView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DiskU.App">
+
+    <UserControl.Resources>
+        <!-- Outline row (Mac: OutlineRow). Cheap: no measuring, shared icons and brushes, OneTime x:Bind. -->
+        <DataTemplate x:Key="OutlineItemTemplate" x:DataType="local:OutlineItem">
+            <Grid Margin="{x:Bind Indent}" Padding="0,4" ColumnSpacing="6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Background="Transparent" Width="16" Height="20" VerticalAlignment="Top"
+                        Visibility="{x:Bind ChevronVisibility}" PointerPressed="Chevron_PointerPressed">
+                    <FontIcon Glyph="{x:Bind ChevronGlyph}" FontSize="10" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </Border>
+                <Image Grid.Column="1" Source="{x:Bind Icon}" Width="16" Height="16" VerticalAlignment="Top" Margin="0,2,0,0" />
+                <Grid Grid.Column="2" RowSpacing="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="3" />
+                    </Grid.RowDefinitions>
+                    <Grid ColumnSpacing="6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{x:Bind Name}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                        <TextBlock Grid.Column="1" Text="{x:Bind SizeText}" FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+                    <!-- Proportion bar: share of the parent, kind color on a faint track. -->
+                    <Grid Grid.Row="1" CornerRadius="1.5" Background="{ThemeResource ProportionTrackBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="{x:Bind BarFilled}" MinWidth="2" />
+                            <ColumnDefinition Width="{x:Bind BarEmpty}" />
+                        </Grid.ColumnDefinitions>
+                        <Border CornerRadius="1.5" Background="{x:Bind KindBrush}" />
+                    </Grid>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <!-- "N smaller items / size / Show more" (Mac: ShowMoreRow). -->
+        <DataTemplate x:Key="ShowMoreTemplate" x:DataType="local:OutlineItem">
+            <Grid Margin="{x:Bind Indent}" Padding="0,3" ColumnSpacing="6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Grid.Column="1" Glyph="&#xE712;" FontSize="14" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <StackPanel Grid.Column="2" Spacing="1" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind SmallerItems}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{x:Bind HiddenSize}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <HyperlinkButton Grid.Column="3" Content="{x:Bind ShowMoreLabel}" FontSize="12" Padding="6,3"
+                                 VerticalAlignment="Center" ToolTipService.ToolTip="{x:Bind ShowMoreTip}" Click="ShowMore_Click" />
+            </Grid>
+        </DataTemplate>
+
+        <local:OutlineTemplateSelector x:Key="OutlineSelector"
+            ItemTemplate="{StaticResource OutlineItemTemplate}"
+            ShowMoreTemplate="{StaticResource ShowMoreTemplate}" />
+
+        <DataTemplate x:Key="CrumbTemplate" x:DataType="local:Crumb">
+            <Grid>
+                <Border CornerRadius="5" Background="{ThemeResource CurrentCrumbBrush}" Visibility="{x:Bind CurrentVisibility}" />
+                <StackPanel Orientation="Horizontal" Spacing="5" Padding="6,3">
+                    <Image Source="{x:Bind Icon, Mode=OneWay}" Width="16" Height="16" VerticalAlignment="Center" />
+                    <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid x:Name="Columns">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="SidebarColumn" Width="300" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar on the window's Mica. -->
+        <ListView x:Name="Outline" Grid.Column="0" Padding="0,4,0,8"
+                  SelectionMode="Single"
+                  ItemTemplateSelector="{StaticResource OutlineSelector}"
+                  SelectionChanged="Outline_SelectionChanged"
+                  ContextRequested="Outline_ContextRequested"
+                  DoubleTapped="Outline_DoubleTapped"
+                  KeyDown="Outline_KeyDown">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource DefaultListViewItemStyle}">
+                    <Setter Property="MinHeight" Value="34" />
+                    <Setter Property="Padding" Value="8,0,10,0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+
+        <local:Splitter x:Name="SidebarSplitter" Grid.Column="1" />
+
+        <!-- Content layer: treemap pane and inspector. -->
+        <Border Grid.Column="2" Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1,1,0,0" CornerRadius="8,0,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" MinWidth="240" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition x:Name="InspectorColumn" Width="290" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Treemap pane (Mac: TreemapPane). -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <InfoBar x:Name="InaccessibleBar" Grid.Row="0" Severity="Warning" IsClosable="False" IsOpen="False" Margin="10,10,10,0">
+                        <InfoBar.IconSource>
+                            <FontIconSource Glyph="&#xEA18;" />
+                        </InfoBar.IconSource>
+                        <InfoBar.ActionButton>
+                            <Button x:Name="RestartAdminButton" Click="RestartAdmin_Click" />
+                        </InfoBar.ActionButton>
+                    </InfoBar>
+
+                    <Grid Grid.Row="1" Padding="8,6,12,6" ColumnSpacing="8" MinHeight="44">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <BreadcrumbBar x:Name="Crumbs" VerticalAlignment="Center" ItemTemplate="{StaticResource CrumbTemplate}" ItemClicked="Crumbs_ItemClicked" />
+                        <TextBlock x:Name="ZoomSize" Grid.Column="1" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+
+                    <Rectangle Grid.Row="2" Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                    <Grid x:Name="TreemapHost" Grid.Row="3" />
+                    <Rectangle Grid.Row="4" Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+                    <!-- Status bar (Mac: StatusBar). -->
+                    <Grid Grid.Row="5" Height="30" Padding="12,0" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Ellipse x:Name="StatusDot" Width="8" Height="8" VerticalAlignment="Center" />
+                        <local:MiddleTrimmedText x:Name="StatusPath" Grid.Column="1" FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock x:Name="StatusHint" Grid.Column="0" Grid.ColumnSpan="2" FontSize="12" VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="StatusRight" Grid.Column="2" FontSize="12" VerticalAlignment="Center" Margin="12,0,0,0" />
+                    </Grid>
+                </Grid>
+
+                <local:Splitter x:Name="InspectorSplitter" Grid.Column="1" />
+
+                <!-- Inspector (Mac: InspectorView). -->
+                <ScrollViewer Grid.Column="2" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" BorderThickness="1,0,0,0"
+                              HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Padding="16" Spacing="18">
+                        <StackPanel x:Name="Details" Spacing="14">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="64" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Image x:Name="DetailIcon" Width="64" Height="64" />
+                                <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock x:Name="DetailName" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Ellipse x:Name="DetailKindDot" Width="8" Height="8" VerticalAlignment="Center" />
+                                        <TextBlock x:Name="DetailKind" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+
+                            <TextBlock x:Name="DetailSize" FontFamily="{StaticResource DisplayFont}" FontSize="30" FontWeight="Bold" />
+
+                            <Grid x:Name="Facts" ColumnSpacing="10" RowSpacing="6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                            </Grid>
+
+                            <StackPanel Spacing="8">
+                                <Grid ColumnSpacing="8" RowSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Button x:Name="RevealButton" HorizontalAlignment="Stretch" Click="Reveal_Click" />
+                                    <Button x:Name="OpenButton" Grid.Column="1" HorizontalAlignment="Stretch" Click="Open_Click" />
+                                    <Button x:Name="CopyButton" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Click="Copy_Click" />
+                                </Grid>
+                                <Button x:Name="TrashButton" HorizontalAlignment="Stretch" Padding="12,8" Click="Trash_Click" Foreground="White">
+                                    <Button.Resources>
+                                        <ResourceDictionary>
+                                            <StaticResource x:Key="ButtonBackground" ResourceKey="DangerBrush" />
+                                            <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="DangerPointerOverBrush" />
+                                            <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="DangerPressedBrush" />
+                                            <SolidColorBrush x:Key="ButtonForeground" Color="White" />
+                                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#E6FFFFFF" />
+                                            <SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
+                                            <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                                            <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+                                        </ResourceDictionary>
+                                    </Button.Resources>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel x:Name="EmptyState" Spacing="6" Padding="0,24">
+                            <FontIcon Glyph="&#xE7C9;" FontSize="28" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock x:Name="EmptyText" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <Rectangle Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+
+                        <!-- Kind legend (Mac: KindLegend). -->
+                        <StackPanel Spacing="8">
+                            <TextBlock x:Name="LegendTitle" Style="{StaticResource SectionTextStyle}" />
+                            <StackPanel x:Name="Legend" Spacing="8" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

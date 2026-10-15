@@ -1,0 +1,59 @@
+<Application
+    x:Class="DiskU.App.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <!-- Mac: primary color at 10% / 12% opacity. -->
+                    <SolidColorBrush x:Key="ProportionTrackBrush" Color="#1A000000" />
+                    <SolidColorBrush x:Key="CurrentCrumbBrush" Color="#1F000000" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#C42B1C" />
+                    <SolidColorBrush x:Key="DangerPointerOverBrush" Color="#B3271A" />
+                    <SolidColorBrush x:Key="DangerPressedBrush" Color="#A12317" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="ProportionTrackBrush" Color="#1AFFFFFF" />
+                    <SolidColorBrush x:Key="CurrentCrumbBrush" Color="#1FFFFFFF" />
+                    <SolidColorBrush x:Key="DangerBrush" Color="#C42B1C" />
+                    <SolidColorBrush x:Key="DangerPointerOverBrush" Color="#D13A2B" />
+                    <SolidColorBrush x:Key="DangerPressedBrush" Color="#B3271A" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <FontFamily x:Key="DisplayFont">Segoe UI Variable Display</FontFamily>
+
+            <!-- Icon-only buttons in the title bar. -->
+            <Style x:Key="ToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Width" Value="40" />
+                <Setter Property="Height" Value="34" />
+                <Setter Property="Padding" Value="0" />
+            </Style>
+
+            <!-- Styles for elements built in code: ThemeResource setters follow the element's theme and
+                 update when it changes, unlike brushes fetched from Application.Resources. -->
+            <Style x:Key="SecondaryCaptionStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            </Style>
+            <Style x:Key="ProportionTrackStyle" TargetType="Grid">
+                <Setter Property="Height" Value="3" />
+                <Setter Property="CornerRadius" Value="1.5" />
+                <Setter Property="Background" Value="{ThemeResource ProportionTrackBrush}" />
+            </Style>
+            <Style x:Key="DangerMenuItemStyle" TargetType="MenuFlyoutItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}">
+                <Setter Property="Foreground" Value="{ThemeResource SystemFillColorCriticalBrush}" />
+            </Style>
+
+            <!-- Section captions in the inspector (Mac headline: 13 pt bold). -->
+            <Style x:Key="SectionTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

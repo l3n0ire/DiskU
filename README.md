@@ -8,7 +8,7 @@ Requires macOS 14 or later. Runs natively on both Apple Silicon and Intel Macs.
 
 ## Install
 
-1. Download `DiskU-X.Y.Z.zip` from the [latest release](../../releases/latest) and unzip it.
+1. Download `DiskU-X.Y.Z-macos.zip` from the [latest release](../../releases/latest) and unzip it.
 2. Open `DiskU.app`. DiskU is not signed, so macOS blocks it the first time.
 3. Go to **System Settings > Privacy & Security**, scroll to the bottom, find the message about DiskU, and click **Open Anyway**.
 
@@ -40,7 +40,7 @@ scripts/bundle.sh
 
 ## Releases
 
-Pushing a version tag on `main` builds and publishes a GitHub release with `DiskU-X.Y.Z.zip`, a universal app for Apple Silicon and Intel Macs (`.github/workflows/release.yml`):
+Pushing a version tag on `main` builds and publishes a GitHub release with `DiskU-X.Y.Z-macos.zip`, a universal app for Apple Silicon and Intel Macs, plus the Windows zips (see `windows/README.md`) (`.github/workflows/release.yml`):
 
 ```sh
 git tag v1.0.0
@@ -49,7 +49,7 @@ git push origin v1.0.0
 
 Add a `## vX.Y.Z` section to `CHANGELOG.md` before tagging. The release notes are that section plus install instructions (`scripts/release-notes.sh vX.Y.Z` previews them), and the release fails if the section is missing.
 
-The workflow runs the tests, then `scripts/release.sh`, which you can also run locally (`scripts/release.sh v1.0.0` writes `dist/DiskU-1.0.0.zip`). Tags must look like `v1.2.3`, and the tagged commit must be on `main`.
+The workflow runs the tests, then `scripts/release.sh`, which you can also run locally (`scripts/release.sh v1.0.0` writes `dist/DiskU-1.0.0-macos.zip`). Tags must look like `v1.2.3`, and the tagged commit must be on `main`.
 
 The app is ad-hoc signed and not notarized, so first-time users need the **Open Anyway** step in [Install](#install).
 

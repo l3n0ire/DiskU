@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Builds a release zip for a version tag: scripts/release.sh v1.2.3 → dist/DiskU-1.2.3.zip
+# Builds a release zip for a version tag: scripts/release.sh v1.2.3 → dist/DiskU-1.2.3-macos.zip
 set -euo pipefail
 cd "${0:A:h}/.."
 
@@ -11,7 +11,7 @@ scripts/swift.sh test
 DISKU_VERSION=$version DISKU_BUILD=$(git rev-list --count HEAD) scripts/bundle.sh
 
 mkdir -p dist
-zip=dist/DiskU-$version.zip
+zip=dist/DiskU-$version-macos.zip
 rm -f $zip
 ditto -c -k --keepParent DiskU.app $zip
 echo $zip

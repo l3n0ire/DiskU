@@ -1,0 +1,16 @@
+<Project>
+  <!-- Shared settings for every project under windows/. -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Keep equal to the latest CHANGELOG.md version; package.ps1 can override with -p:Version=. -->
+    <Version>1.0.4</Version>
+    <Product>DiskU</Product>
+    <Company>DiskU</Company>
+    <Copyright>DiskU contributors</Copyright>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'DiskU.Core' Or '$(MSBuildProjectName)' == 'DiskU.Core.Tests'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>
