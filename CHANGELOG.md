@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.5
+
+- **DiskU for Windows.** DiskU now runs natively on Windows 10 and 11, with the same treemap, size-sorted sidebar, and inspector as the Mac app. Deleting an item moves it to the Recycle Bin.
+- **Clearer downloads.** Each release now offers `macos`, `windows-x64`, and `windows-arm64` zips.
+
 ## v1.0.4
 
 - **Update notices.** DiskU checks GitHub for a newer release when it opens and shows a banner linking to it.
