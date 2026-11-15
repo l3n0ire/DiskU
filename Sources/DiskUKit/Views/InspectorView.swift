@@ -95,7 +95,9 @@ private struct ItemDetails: View {
                 .buttonStyle(.bordered)
                 .controlSize(.regular)
 
-                Button(role: .destructive) {
+                // No `role: .destructive`: on macOS 27 a button with that role ignores mouse clicks.
+                // The red tint and the confirmation dialog carry the warning instead.
+                Button {
                     store.pendingTrash = node
                 } label: {
                     Label("Move to Trash…", systemImage: "trash").frame(maxWidth: .infinity)
