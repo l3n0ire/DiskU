@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.7
+
+- **Move to Trash works on macOS 27, for real this time.** The fix in 1.0.6 worked when DiskU was built locally but not in the downloaded app. The Mac download is now built with the newer macOS tools, so the Move to Trash button in the inspector responds to clicks.
+
 ## v1.0.6
 
 - **Move to Trash works on macOS 27.** The Move to Trash button in the Mac inspector ignored clicks on macOS 27. It responds again.
