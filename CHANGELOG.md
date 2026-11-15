@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.6
+
+- **Move to Trash works on macOS 27.** The Move to Trash button in the Mac inspector ignored clicks on macOS 27. It responds again.
+
 ## v1.0.5
 
 - **DiskU for Windows.** DiskU now runs natively on Windows 10 and 11, with the same treemap, size-sorted sidebar, and inspector as the Mac app. Deleting an item moves it to the Recycle Bin.
